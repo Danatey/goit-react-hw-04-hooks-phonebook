@@ -8,12 +8,8 @@ import ContactsListItem from "./Components/ContactsListItem";
 
 import "./App.scss";
 
-let isFirstRender = true;
-
 const App = () => {
-  const [contacts, setContacts] = useState(() => {
-    return JSON.parse(window.localStorage.getItem("contacts")) ?? [];
-  });
+  const [contacts, setContacts] = useState([]);
   const [filter, setFilter] = useState("");
   const [name, setName] = useState("");
   const [number, setNumber] = useState("");
@@ -21,11 +17,10 @@ const App = () => {
   const propsId = nanoid();
 
   useEffect(() => {
-    if (isFirstRender) {
-      isFirstRender = false;
-      return;
+    if (window.localStorage.getItem("contacts")?.length > 0) {
+      setContacts(JSON.parse(window.localStorage.getItem("contacts")));
     }
-  });
+  }, []);
 
   useEffect(() => {
     window.localStorage.setItem("contacts", JSON.stringify(contacts));
@@ -40,7 +35,7 @@ const App = () => {
       case "number":
         setNumber(value);
         break;
-      case "filter":
+      case "Find contacts by name":
         setFilter(value);
         break;
       default:
@@ -51,15 +46,13 @@ const App = () => {
   const handleSubmit = (event) => {
     event.preventDefault();
 
-    setContacts(() => {
-      if (contacts.some((contact) => contact.name.includes(name))) {
-        alert(`${name} is already in contacts`);
-        return;
-      }
+    if (contacts.find((item) => item.name === name)) {
+      alert(`${name} is already in contacts`);
+      reset();
+      return;
+    }
 
-      return [...contacts, { id: propsId, name, number }];
-    });
-
+    setContacts((prevState) => [...prevState, { id: propsId, name, number }]);
     reset();
   };
 
@@ -94,7 +87,7 @@ const App = () => {
       <h2 className="secondary-title">Contacts</h2>
       {contacts.length > 0 ? (
         <>
-          <Filter onChange={handleChange} value={filter} />
+          <Filter onChange={handleChange} filter={filter} />
           <ContactList>
             <ContactsListItem
               contacts={handleFilter()}
@@ -107,6 +100,13 @@ const App = () => {
       )}
     </div>
   );
+};
+
+App.defaultProps = {
+  contacts: [],
+  filter: "",
+  name: "",
+  number: "",
 };
 
 export default App;

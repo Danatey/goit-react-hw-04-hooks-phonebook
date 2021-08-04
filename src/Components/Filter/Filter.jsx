@@ -7,9 +7,9 @@ import './Filter.scss'
 
 const generateID = nanoid();
 
-const Filter = ({ value, onChange }) => (
+const Filter = ({ filter, onChange }) => (
   <Input
-    value={value}
+    value={filter}
     onChange={onChange}
     type="text"
     id={generateID}
